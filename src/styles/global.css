@@ -393,6 +393,8 @@ button { font-family: inherit; }
 .itin-title { font-size: 15px; font-weight: 800; }
 .itin-total { font-size: 18px; font-weight: 800; color: var(--accent); }
 .itin-total small { font-size: 11px; color: var(--muted); font-weight: 600; }
+.itin-fare { font-size: 12.5px; font-weight: 700; color: var(--muted); margin-top: 2px; }
+.itin-fare.cheapest { color: var(--green); }
 .leg-list { display: flex; flex-direction: column; }
 .leg {
   display: flex;
@@ -428,6 +430,82 @@ button { font-family: inherit; }
   border-radius: 8px;
   padding: 8px 10px;
   line-height: 1.5;
+}
+
+/* ---------- 내 경로 만들기 폼 ---------- */
+.builder-option {
+  border: 1px solid var(--line);
+  border-radius: 10px;
+  padding: 10px;
+  margin-bottom: 10px;
+}
+.form-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 8px;
+}
+.form-grid label {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  font-size: 11.5px;
+  font-weight: 700;
+  color: var(--muted);
+}
+.form-grid label:first-child { grid-column: 1 / -1; }
+.form-grid input, .form-grid select {
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  padding: 9px 10px;
+  font-size: 14px;
+  font-family: inherit;
+  background: var(--card);
+  color: var(--text);
+  width: 100%;
+}
+.form-grid input:focus, .form-grid select:focus { outline: none; border-color: var(--accent); }
+.leg-editor {
+  background: var(--bg);
+  border-radius: 10px;
+  padding: 10px;
+  margin-top: 8px;
+}
+.leg-editor-head {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 8px;
+}
+.leg-editor-type { font-size: 13px; font-weight: 800; }
+.btn-mini {
+  border: 1px solid var(--line);
+  background: var(--card);
+  border-radius: 7px;
+  padding: 4px 10px;
+  font-size: 12px;
+  font-weight: 700;
+  cursor: pointer;
+  color: var(--text);
+}
+.btn-mini.danger { color: var(--red); }
+.btn-block {
+  display: block;
+  width: 100%;
+  border: 0;
+  background: var(--accent);
+  color: #fff;
+  border-radius: 10px;
+  padding: 13px 0;
+  font-size: 15px;
+  font-weight: 800;
+  cursor: pointer;
+  margin-top: 12px;
+}
+.btn-block.ghost {
+  background: none;
+  border: 1.5px dashed var(--line);
+  color: var(--muted);
+  font-weight: 700;
 }
 
 .loading, .error-box {

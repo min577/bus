@@ -1,16 +1,17 @@
-// 동선별 기대 총 소요시간 계산 엔진 (순수함수)
+// 동선별 기대 총 소요시간 + 요금 계산 엔진 (순수함수)
 //
 // 버스 leg의 기대시간 = 평균 대기(배차/2)
 //                    + 만차로 보낼 기대 대수(패턴 확률 기반) × 배차간격
 //                    + 정적 구간 소요시간
 import { getRoute } from '../data/routes.js'
 import { getDirection, defaultBinIndex, expectedBusesToBoard } from './patternStats.js'
+import { computeFare } from './fare.js'
 
 /**
- * @param option  itineraries.js 의 option
+ * @param option  itineraries.js 의 option (또는 사용자가 만든 커스텀 옵션)
  * @param dirKey  'commute' | 'return' — 패턴 조회 방향
  * @param date    기준 시각 (시간창 밖이면 피크 기준으로 계산됨)
- * @returns { totalMin, legs: [{...leg, computedMin, detail}], busNote }
+ * @returns { totalMin, fare, legs: [{...leg, computedMin, detail}], busNote }
  */
 export function computeOption(option, dirKey, date = new Date()) {
   let totalMin = 0
@@ -28,8 +29,22 @@ export function computeOption(option, dirKey, date = new Date()) {
       return { ...leg, computedMin: t, detail: `대기 ~${leg.wait || 0}분 포함` }
     }
 
+    if (leg.type === 'taxi') {
+      const t = leg.min + (leg.callWait || 3) // 호출 대기
+      totalMin += t
+      return {
+        ...leg,
+        computedMin: t,
+        detail: `호출 대기 ~${leg.callWait || 3}분 · 약 ${leg.km}km`,
+      }
+    }
+
     // bus
     const route = getRoute(leg.routeKey)
+    if (!route) {
+      totalMin += leg.rideMin || 0
+      return { ...leg, computedMin: leg.rideMin || 0, detail: '노선 정보 없음' }
+    }
     const direction = getDirection(leg.routeKey, dirKey)
     const headway = route.headwayPeakMin
 
@@ -64,7 +79,7 @@ export function computeOption(option, dirKey, date = new Date()) {
     return { ...leg, computedMin: t, detail: detailParts.join(' · ') }
   })
 
-  return { totalMin: Math.round(totalMin), legs, busNote }
+  return { totalMin: Math.round(totalMin), fare: computeFare(option.legs), legs, busNote }
 }
 
 /** 시나리오의 모든 옵션을 계산하고 기대시간 오름차순 정렬 */

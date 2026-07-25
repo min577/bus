@@ -3,10 +3,12 @@
 // leg 종류
 //  - walk:   도보 이동 (min 고정)
 //  - bus:    광역버스 탑승. routeKey + boardSeq 가 있으면 compare 엔진이
-//            대기시간(배차/2) + 만차로 보낼 기대 대수 페널티를 패턴에서 계산해 더함
-//  - subway: 지하철 (min 고정 + 평균 대기 wait)
+//            대기시간(배차/2) + 만차로 보낼 기대 대수 페널티를 패턴에서 계산해 더함.
+//            busClass: 'local' 이면 일반/마을버스 요금 적용
+//  - subway: 지하철 (min 고정 + 평균 대기 wait, km 는 거리 추가요금 계산용)
+//  - taxi:   택시 (min 고정 + 호출 대기, km 로 요금 추정)
 //
-// 소요시간은 예시값입니다. ODsay 등 길찾기 API 연동 시 이 파일만 교체하면 됩니다.
+// 소요시간·거리는 예시값입니다. ODsay 등 길찾기 API 연동 시 이 파일만 교체하면 됩니다.
 
 export const SCENARIOS = [
   {
@@ -35,9 +37,14 @@ export const SCENARIOS = [
         title: '지하철 환승 (수인분당선 + 2호선)',
         legs: [
           { type: 'walk', label: '영통역까지 도보', min: 4 },
-          { type: 'subway', label: '수인분당선 영통 → 선릉', min: 41, wait: 4 },
-          { type: 'subway', label: '2호선 환승 선릉 → 강남', min: 6, wait: 3 },
+          { type: 'subway', label: '수인분당선 영통 → 선릉', min: 41, wait: 4, km: 28 },
+          { type: 'subway', label: '2호선 환승 선릉 → 강남', min: 6, wait: 3, km: 3 },
         ],
+      },
+      {
+        key: 'taxi',
+        title: '택시',
+        legs: [{ type: 'taxi', label: '택시 영통 → 강남역', min: 50, km: 33 }],
       },
     ],
   },
@@ -67,9 +74,14 @@ export const SCENARIOS = [
         title: '지하철 환승 (수인분당선 + 2·1호선)',
         legs: [
           { type: 'walk', label: '영통역까지 도보', min: 4 },
-          { type: 'subway', label: '수인분당선 영통 → 왕십리', min: 55, wait: 4 },
-          { type: 'subway', label: '2호선 → 1호선 환승, 시청 경유 서울역', min: 18, wait: 4 },
+          { type: 'subway', label: '수인분당선 영통 → 왕십리', min: 55, wait: 4, km: 36 },
+          { type: 'subway', label: '2호선 → 1호선 환승, 시청 경유 서울역', min: 18, wait: 4, km: 6 },
         ],
+      },
+      {
+        key: 'taxi',
+        title: '택시',
+        legs: [{ type: 'taxi', label: '택시 영통 → 서울역', min: 60, km: 41 }],
       },
     ],
   },
@@ -99,9 +111,14 @@ export const SCENARIOS = [
         title: '지하철 환승 (수인분당선 + 2호선)',
         legs: [
           { type: 'walk', label: '망포역까지 도보', min: 3 },
-          { type: 'subway', label: '수인분당선 망포 → 선릉', min: 47, wait: 4 },
-          { type: 'subway', label: '2호선 환승 선릉 → 강변', min: 16, wait: 3 },
+          { type: 'subway', label: '수인분당선 망포 → 선릉', min: 47, wait: 4, km: 31 },
+          { type: 'subway', label: '2호선 환승 선릉 → 강변', min: 16, wait: 3, km: 9 },
         ],
+      },
+      {
+        key: 'taxi',
+        title: '택시',
+        legs: [{ type: 'taxi', label: '택시 망포 → 강변역', min: 55, km: 38 }],
       },
     ],
   },

@@ -6,7 +6,7 @@
 |---|---|
 | 실시간 | 정류장별 버스 도착시간 + 잔여좌석 (GBIS 공공데이터 실시간 API) |
 | 탑승 패턴 | 평일 시간대×정류장 좌석 확보 확률 히트맵 — "어디서 타야 앉을까" |
-| 동선 비교 | 직행 대기 vs 거슬러 타기 vs 지하철 환승, 만차 확률까지 넣은 기대시간 비교 |
+| 동선 비교 | 직행 대기 vs 거슬러 타기 vs 지하철 환승 vs 택시 — 만차 확률·요금까지 넣은 비교. 도보/버스/지하철/택시를 조합해 **내 경로 직접 만들기** 지원 (localStorage 저장) |
 
 예시 노선: **M5107 · 5100 · 1112** (영통/경희대 → 서울역·강남역·강변역)
 
@@ -58,7 +58,7 @@ src/
   api/        gbis.js(클라이언트) · mock.js(데모 모드)
   hooks/      useArrivals(20초 폴링+가시성 정지) · useFavorites
   data/       routes.js(큐레이션 노선) · patterns.json · itineraries.js(비교 시나리오)
-  lib/        patternStats.js · compare.js(기대시간 엔진)
+  lib/        patternStats.js · compare.js(기대시간 엔진) · fare.js(요금: 환승할인 근사·택시 추정)
   pages/      HomePage · PatternPage · ComparePage
   components/ TabBar · StationPicker · ArrivalCard · SeatBadge ·
               PatternHeatmap(SVG) · StationRankList · ItineraryCard
