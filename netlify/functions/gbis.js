@@ -66,14 +66,28 @@ function normalizeKey(raw) {
 async function callUpstream(path, key, extraParams) {
   const params = new URLSearchParams({ serviceKey: key, format: 'json', ...extraParams })
   const res = await fetch(`${BASE}${path}?${params.toString()}`)
-  return res.text()
+  return { status: res.status, text: await res.text() }
+}
+
+// 업스트림 응답 한 건을 진단용으로 요약
+function diagnose(status, text) {
+  try {
+    const data = JSON.parse(text)
+    const rc = Number(data?.response?.msgHeader?.resultCode)
+    return {
+      ok: rc === 0 || rc === 4,
+      detail: `HTTP ${status} · resultCode=${rc} ${data?.response?.msgHeader?.resultMessage || ''}`.trim(),
+    }
+  } catch {
+    return { ok: false, detail: `HTTP ${status} · ${text.slice(0, 200).trim()}` }
+  }
 }
 
 export const handler = async (event) => {
   const key = normalizeKey(process.env.GBIS_API_KEY)
   const q = event.queryStringParameters || {}
 
-  // 자가진단: 키 설정 여부 + 실제 GBIS 호출 성공 여부
+  // 자가진단: 키 설정 여부 + 4개 API 각각 호출해 어디가 막혔는지 리포트
   if (q.op === 'health') {
     if (!key) {
       return json(200, {
@@ -81,30 +95,46 @@ export const handler = async (event) => {
         hint: 'Netlify 환경변수 GBIS_API_KEY가 비어 있습니다. 등록 후 재배포하세요.',
       })
     }
+    const report = { keyConfigured: true, keyLength: key.length, apis: {} }
     try {
-      const text = await callUpstream(OPS.stationSearch.path, key, { keyword: '영통' })
-      let upstreamOk = false
-      let detail
+      // 1) 정류소정보 (경기도_정류소정보 활용신청 필요)
+      const st = await callUpstream(OPS.stationSearch.path, key, { keyword: '영통' })
+      report.apis['정류소정보(stationSearch)'] = diagnose(st.status, st.text)
+
+      // 2) 노선정보 (경기도_노선정보조회 활용신청 필요)
+      const rt = await callUpstream(OPS.routeSearch.path, key, { keyword: '5100' })
+      report.apis['노선정보(routeSearch)'] = diagnose(rt.status, rt.text)
+
+      // 3) 도착정보 (경기도_버스도착정보 활용신청 필요) — 정류소 검색이 성공하면 실제 정류소로 테스트
+      let stationId = null
       try {
-        const data = JSON.parse(text)
-        const rc = Number(data?.response?.msgHeader?.resultCode)
-        upstreamOk = rc === 0 || rc === 4
-        detail = `resultCode=${rc} ${data?.response?.msgHeader?.resultMessage || ''}`.trim()
-      } catch {
-        // 키 오류·미신청 시 XML(OpenAPI_ServiceResponse)로 응답됨
-        detail = text.slice(0, 300)
+        const list = JSON.parse(st.text)?.response?.msgBody?.busStationList
+        const first = Array.isArray(list) ? list[0] : list
+        stationId = first?.stationId
+      } catch { /* 정류소 검색 실패 시 생략 */ }
+      if (stationId) {
+        const ar = await callUpstream(OPS.arrivalList.path, key, { stationId: String(stationId) })
+        report.apis['도착정보(arrivalList)'] = diagnose(ar.status, ar.text)
+      } else {
+        report.apis['도착정보(arrivalList)'] = { ok: null, detail: '정류소 검색 실패로 테스트 생략' }
       }
-      return json(200, {
-        keyConfigured: true,
-        keyLength: key.length,
-        upstreamOk,
-        detail,
-        hint: upstreamOk
-          ? '정상입니다.'
-          : 'SERVICE_KEY 오류면 Decoding 키인지 확인, 미신청 오류면 공공데이터포털에서 해당 데이터셋 활용신청 승인 여부를 확인하세요.',
-      })
+
+      // 4) 버스위치정보 (경기도_버스위치정보 활용신청 필요) — routeId 없이 호출해 게이트웨이 통과 여부만 확인
+      const loc = await callUpstream(OPS.busLocation.path, key, { routeId: '200000078' })
+      report.apis['버스위치정보(busLocation)'] = diagnose(loc.status, loc.text)
+
+      const anyForbidden = Object.values(report.apis).some(
+        (a) => a.detail && /Forbidden|401|403/i.test(a.detail),
+      )
+      report.upstreamOk = Object.values(report.apis).every((a) => a.ok !== false)
+      report.hint = report.upstreamOk
+        ? '모든 API 정상입니다.'
+        : anyForbidden
+          ? 'Forbidden = 해당 데이터셋 활용신청이 안 됐거나 승인 반영 전(최대 1시간)입니다. 공공데이터포털 마이페이지 > 활용신청 현황에서 ok:false로 표시된 데이터셋을 각각 신청/확인하세요.'
+          : 'detail의 resultMessage를 확인하세요. SERVICE KEY 오류면 마이페이지의 일반 인증키(Decoding)를 사용하세요.'
+      return json(200, report)
     } catch (err) {
-      return json(200, { keyConfigured: true, upstreamOk: false, detail: String(err) })
+      return json(200, { ...report, upstreamOk: false, detail: String(err) })
     }
   }
 
