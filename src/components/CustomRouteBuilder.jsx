@@ -38,7 +38,10 @@ function LegEditor({ leg, direction, onChange, onRemove }) {
     <div className="leg-editor">
       <div className="leg-editor-head">
         <span className="leg-editor-type">
-          {{ walk: '🚶 도보', bus: '🚌 광역버스', subway: '🚇 지하철', taxi: '🚕 택시' }[leg.type]}
+          <span className={`leg-mode ${leg.type}`}>
+            {{ walk: '도보', bus: '버스', subway: '지하철', taxi: '택시' }[leg.type]}
+          </span>
+          {{ walk: '도보 이동', bus: '광역버스', subway: '지하철', taxi: '택시' }[leg.type]}
         </span>
         <button type="button" className="btn-mini danger" onClick={onRemove}>삭제</button>
       </div>

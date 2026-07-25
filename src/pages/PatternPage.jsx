@@ -64,8 +64,8 @@ export default function PatternPage() {
 
       <div className="card">
         <div className="time-now">
-          🕐 {direction.bins[selectedBin]} 기준
-          {!initialBin.isNow && binIdx === null && ' (혼잡 피크 시간대)'}
+          {direction.bins[selectedBin]} <small>기준</small>
+          {!initialBin.isNow && binIdx === null && <small> · 혼잡 피크 시간대</small>}
         </div>
         <input
           className="time-slider"
@@ -90,7 +90,7 @@ export default function PatternPage() {
         <StationRankList ranked={ranked} />
         {tip && (
           <div className="tip-box">
-            💡 {worst.name}에서 {Math.round(worst.pBoard * 100)}%라면, {tip.name}까지 거슬러
+            {worst.name}에서 {Math.round(worst.pBoard * 100)}%라면, {tip.name}까지 거슬러
             가서 타면 확률이 {Math.round(tip.pBoard * 100)}%로 +{tip.gainPp}%p 올라가요.
           </div>
         )}
@@ -98,7 +98,7 @@ export default function PatternPage() {
 
       <div className="notice">
         {PATTERN_SOURCE === 'simulated'
-          ? '⚠️ 이 패턴은 프로토타입용 시뮬레이션 데이터입니다. 실제 수집 데이터가 쌓이면 같은 화면에서 실측 패턴으로 교체됩니다.'
+          ? '이 패턴은 프로토타입용 시뮬레이션 데이터입니다. 실제 수집 데이터가 쌓이면 같은 화면에서 실측 패턴으로 교체됩니다.'
           : '실측 수집 데이터 기반 패턴입니다.'}
       </div>
     </>

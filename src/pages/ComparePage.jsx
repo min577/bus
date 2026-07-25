@@ -48,7 +48,7 @@ export default function ComparePage() {
             className={`chip ${s.key === scenarioKey ? 'active' : ''}`}
             onClick={() => { setScenarioKey(s.key); setBuilding(false) }}
           >
-            {s.custom ? '⭐ ' : ''}{s.title}
+            {s.title}
           </button>
         ))}
         <button className={`chip ${building ? 'active' : ''}`} onClick={() => setBuilding(true)}>

@@ -2,9 +2,9 @@
 
 const lerp = (a, b, t) => Math.round(a + (b - a) * t)
 const rgb = (c) => `rgb(${c[0]},${c[1]},${c[2]})`
-const RED = [198, 40, 40]
-const ORANGE = [249, 168, 37]
-const GREEN = [46, 125, 50]
+const RED = [229, 72, 77]
+const ORANGE = [255, 178, 36]
+const GREEN = [48, 164, 108]
 
 export function probColor(p) {
   const [from, to, t] = p <= 0.5 ? [RED, ORANGE, p / 0.5] : [ORANGE, GREEN, (p - 0.5) / 0.5]
@@ -27,7 +27,7 @@ export default function PatternHeatmap({ direction, selectedBin, onSelectBin }) 
         {/* 시간 라벨 (정시마다) */}
         {bins.map((b, i) =>
           b.endsWith(':00') ? (
-            <text key={b} x={LABEL_W + i * CELL_W + 1} y={13} fontSize="10" fill="#6b7280">
+            <text key={b} x={LABEL_W + i * CELL_W + 1} y={13} fontSize="10" fill="#8b95a1">
               {b.slice(0, 2)}시
             </text>
           ) : null,
@@ -40,7 +40,7 @@ export default function PatternHeatmap({ direction, selectedBin, onSelectBin }) 
               fontSize="11"
               fontWeight="600"
               textAnchor="end"
-              fill="#1a1d21"
+              fill="#191f28"
             >
               {st.name.length > 8 ? `${st.name.slice(0, 8)}…` : st.name}
             </text>
@@ -68,7 +68,7 @@ export default function PatternHeatmap({ direction, selectedBin, onSelectBin }) 
             width={CELL_W + 1.5}
             height={stations.length * CELL_H + 3}
             fill="none"
-            stroke="#1a1d21"
+            stroke="#191f28"
             strokeWidth="2"
             rx={4}
           />

@@ -1,7 +1,7 @@
 import { formatKrw } from '../lib/fare.js'
 
-const LEG_COLORS = { walk: '#9e9e9e', bus: '#c62828', subway: '#1565c0', taxi: '#f9a825' }
-const LEG_ICONS = { walk: '🚶', bus: '🚌', subway: '🚇', taxi: '🚕' }
+const LEG_COLORS = { walk: '#b0b8c1', bus: '#e5484d', subway: '#3182f6', taxi: '#d9730d' }
+const LEG_NAMES = { walk: '도보', bus: '버스', subway: '지하철', taxi: '택시' }
 
 export default function ItineraryCard({ result, isBest, isCheapest }) {
   const { option, totalMin, fare, legs, busNote } = result
@@ -10,7 +10,7 @@ export default function ItineraryCard({ result, isBest, isCheapest }) {
       {isBest && <span className="best-badge">지금 기준 최속</span>}
       <div className="itin-head">
         <span className="itin-title">{option.title}</span>
-        <span style={{ textAlign: 'right' }}>
+        <span>
           <div className="itin-total">
             {totalMin}분 <small>예상</small>
           </div>
@@ -27,7 +27,8 @@ export default function ItineraryCard({ result, isBest, isCheapest }) {
             {i < legs.length - 1 && <span className="leg-line" />}
             <div className="leg-body">
               <div className="leg-title">
-                {LEG_ICONS[leg.type]} {leg.label}
+                <span className={`leg-mode ${leg.type}`}>{LEG_NAMES[leg.type]}</span>
+                {leg.label}
               </div>
               <div className="leg-sub">{leg.detail}</div>
             </div>
